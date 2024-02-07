@@ -17,13 +17,24 @@ The library takes its name from a famous song wrote by a famous artist as the go
 This package provides helpers designed to help in writing HTTP response. The principle is easy: create a new Response fed with a set of options and inject the `http.responseWriter` into it to write the response.
 
 ```go
-type Message struct {
+package your_package
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/alexdebril/figaro/http/response"
+)
+
+type JsonMessage struct {
     Date    time.Time `json:"date"`
     Message string    `json:"message"`
 }
 
+type Handler struct {}
+
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    message := &Message{
+    message := &JsonMessage{
         Date:    time.Now(),
         Message: "this is the new message",
     }
