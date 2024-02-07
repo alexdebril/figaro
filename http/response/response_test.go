@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	errorOnNonEmptyPayload = "default payload should be empty"
+	errorOnNonEmptyPayload = "default body should be empty"
 	errorOnStatusCode      = "wrong http status code: %+v"
 	errorOnPayload         = "unexpected data: %+v"
 	errorOnHeader          = "wrong header: %+v"
@@ -18,7 +18,7 @@ func TestNewResponse(t *testing.T) {
 	if resp.Status != http.StatusOK {
 		t.Errorf(errorOnStatusCode, resp.Status)
 	}
-	if len(resp.Payload) > 0 {
+	if len(resp.Body) > 0 {
 		t.Error(errorOnNonEmptyPayload)
 	}
 	if len(resp.Headers) > 0 {
@@ -46,7 +46,7 @@ func TestWithStatus(t *testing.T) {
 
 func TestWithPayload(t *testing.T) {
 	html := "<html><body><p>>Hello World</p></body></html>"
-	resp := NewResponse(WithPayload([]byte(html)))
+	resp := NewResponse(WithBody([]byte(html)))
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
@@ -87,7 +87,7 @@ func TestWithJsonPayload(t *testing.T) {
 		Data string `json:"data"`
 	}
 	mesg := message{Data: "hello world"}
-	resp := NewResponse(WithJsonPayload(mesg))
+	resp := NewResponse(WithJsonBody(mesg))
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {

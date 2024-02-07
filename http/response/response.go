@@ -48,26 +48,26 @@ func (h HeaderOption) Apply(response *Response) {
 	response.Headers[h.name] = h.value
 }
 
-func WithPayload(payload []byte) Option {
-	return PayloadOption{payload: payload}
+func WithBody(body []byte) Option {
+	return BodyOption{body: body}
 }
 
-type PayloadOption struct {
-	payload []byte
+type BodyOption struct {
+	body []byte
 }
 
-func (p PayloadOption) Apply(response *Response) {
-	response.Payload = p.payload
+func (p BodyOption) Apply(response *Response) {
+	response.Body = p.body
 }
 
-func WithJsonPayload(v any) Option {
-	return JsonPayloadOption{
+func WithJsonBody(v any) Option {
+	return JsonBodyOption{
 		data:   v,
 		Option: WithContentTypeJson(),
 	}
 }
 
-type JsonPayloadOption struct {
+type JsonBodyOption struct {
 	data any
 	Option
 }
@@ -75,24 +75,24 @@ type JsonPayloadOption struct {
 type Response struct {
 	Status  int
 	Headers map[string]string
-	Payload []byte
+	Body    []byte
 }
 
-func (jp JsonPayloadOption) Apply(response *Response) {
+func (jp JsonBodyOption) Apply(response *Response) {
 	jp.Option.Apply(response)
 	j, err := json.Marshal(jp.data)
 	if err != nil {
 		response.Status = http.StatusInternalServerError
-		response.Payload = []byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error()))
+		response.Body = []byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error()))
 		return
 	}
-	response.Payload = j
+	response.Body = j
 }
 
 func NewResponse(opts ...Option) *Response {
 	response := &Response{
 		Status:  DefaultHttpStatus,
-		Payload: make([]byte, 0),
+		Body:    make([]byte, 0),
 		Headers: make(map[string]string),
 	}
 	for _, opt := range opts {
@@ -106,5 +106,5 @@ func (r *Response) Write(w http.ResponseWriter) {
 		w.Header().Set(name, value)
 	}
 	w.WriteHeader(r.Status)
-	_, _ = w.Write(r.Payload)
+	_, _ = w.Write(r.Body)
 }
