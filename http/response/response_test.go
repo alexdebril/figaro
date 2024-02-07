@@ -5,16 +5,24 @@ import (
 	"testing"
 )
 
+const (
+	errorOnNonEmptyPayload = "default payload should be empty"
+	errorOnStatusCode      = "wrong http status code: %+v"
+	errorOnPayload         = "unexpected data: %+v"
+	errorOnHeader          = "wrong header: %+v"
+	expectedJsonPayload    = `{"data":"hello world"}`
+)
+
 func TestNewResponse(t *testing.T) {
 	resp := NewResponse()
 	if resp.Status != http.StatusOK {
-		t.Errorf("unexpected status: %+v", resp.Status)
+		t.Errorf(errorOnStatusCode, resp.Status)
 	}
 	if len(resp.Payload) > 0 {
-		t.Error("default payload should be empty")
+		t.Error(errorOnNonEmptyPayload)
 	}
 	if len(resp.Headers) > 0 {
-		t.Error("default headers should be empty")
+		t.Error(errorOnNonEmptyPayload)
 	}
 }
 
@@ -23,7 +31,7 @@ func TestResponse_Write(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 }
 
@@ -32,7 +40,7 @@ func TestWithStatus(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusCreated {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 }
 
@@ -42,10 +50,10 @@ func TestWithPayload(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if string(w.data) != html {
-		t.Errorf("unexpected data: %+v", w.data)
+		t.Errorf(errorOnPayload, w.data)
 	}
 }
 
@@ -55,7 +63,7 @@ func TestWithHeader(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != contentType {
 		t.Errorf("wrong header: %+v", w.header.Get(HeaderContentType))
@@ -70,7 +78,7 @@ func TestWithContentTypeJson(t *testing.T) {
 		t.Errorf("wrong http status code: %+v", w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != TypeApplicationJson {
-		t.Errorf("wrong header: %+v", w.header.Get(HeaderContentType))
+		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
 	}
 }
 
@@ -83,13 +91,13 @@ func TestWithJsonPayload(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != TypeApplicationJson {
 		t.Errorf("wrong header: %+v", w.header.Get(HeaderContentType))
 	}
-	if string(w.data) != "{\"data\":\"hello world\"}" {
-		t.Errorf("wrong payload:  %+v", string(w.data))
+	if string(w.data) != expectedJsonPayload {
+		t.Errorf(errorOnPayload, string(w.data))
 	}
 }
 
