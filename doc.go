@@ -13,7 +13,7 @@ It features HTTP response building through a simple set of helpers. Intended use
 				Date:    time.Now(),
 				Message: "this is the new message",
 			}
-			resp := response.NewResponse(response.WithJsonBody(message))
+			resp := response.NewJsonResponse(message)
 			resp.Write(w)
 		}
 
