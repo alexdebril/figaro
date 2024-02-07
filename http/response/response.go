@@ -109,6 +109,10 @@ func NewResponse(opts ...Option) *Response {
 	return response
 }
 
+func NewJsonResponse(v any, opts ...Option) *Response {
+	return NewResponse(append(opts, WithJsonBody(v))...)
+}
+
 // Write sends the Response's content to the http.ResponseWriter.
 func (r *Response) Write(w http.ResponseWriter) {
 	for name, value := range r.Headers {

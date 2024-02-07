@@ -26,7 +26,7 @@ func TestNewResponse(t *testing.T) {
 	}
 }
 
-func TestResponse_Write(t *testing.T) {
+func TestResponseWrite(t *testing.T) {
 	resp := NewResponse()
 	w := newMockResponseWriter()
 	resp.Write(w)
@@ -88,6 +88,25 @@ func TestWithJsonBody(t *testing.T) {
 	}
 	mesg := message{Data: "hello world"}
 	resp := NewResponse(WithJsonBody(mesg))
+	w := newMockResponseWriter()
+	resp.Write(w)
+	if w.statusCode != http.StatusOK {
+		t.Errorf(errorOnStatusCode, w.statusCode)
+	}
+	if w.header.Get(HeaderContentType) != TypeApplicationJson {
+		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
+	}
+	if string(w.data) != expectedJsonBody {
+		t.Errorf(errorOnBody, string(w.data))
+	}
+}
+
+func TestNewJsonResponse(t *testing.T) {
+	type message struct {
+		Data string `json:"data"`
+	}
+	mesg := message{Data: "hello world"}
+	resp := NewJsonResponse(mesg)
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
