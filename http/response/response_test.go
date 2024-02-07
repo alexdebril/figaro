@@ -66,7 +66,7 @@ func TestWithHeader(t *testing.T) {
 		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != contentType {
-		t.Errorf("wrong header: %+v", w.header.Get(HeaderContentType))
+		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
 	}
 }
 
@@ -75,7 +75,7 @@ func TestWithContentTypeJson(t *testing.T) {
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
-		t.Errorf("wrong http status code: %+v", w.statusCode)
+		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != TypeApplicationJson {
 		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
@@ -94,7 +94,7 @@ func TestWithJsonPayload(t *testing.T) {
 		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if w.header.Get(HeaderContentType) != TypeApplicationJson {
-		t.Errorf("wrong header: %+v", w.header.Get(HeaderContentType))
+		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
 	}
 	if string(w.data) != expectedJsonPayload {
 		t.Errorf(errorOnPayload, string(w.data))
