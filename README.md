@@ -27,7 +27,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         Date:    time.Now(),
         Message: "this is the new message",
     }
-    resp := response.NewResponse(response.WithJsonBody(message))
+    resp := response.NewJsonResponse(message)
     resp.Write(w)
 }
 ```
