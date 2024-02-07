@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	errorOnNonEmptyPayload = "default payload should be empty"
-	errorOnStatusCode      = "wrong http status code: %+v"
-	errorOnPayload         = "unexpected data: %+v"
-	errorOnHeader          = "wrong header: %+v"
-	expectedJsonPayload    = `{"data":"hello world"}`
+	errorOnNonEmptyBody = "default body should be empty"
+	errorOnStatusCode   = "wrong http status code: %+v"
+	errorOnBody         = "unexpected data: %+v"
+	errorOnHeader       = "wrong header: %+v"
+	expectedJsonBody    = `{"data":"hello world"}`
 )
 
 func TestNewResponse(t *testing.T) {
@@ -18,11 +18,11 @@ func TestNewResponse(t *testing.T) {
 	if resp.Status != http.StatusOK {
 		t.Errorf(errorOnStatusCode, resp.Status)
 	}
-	if len(resp.Payload) > 0 {
-		t.Error(errorOnNonEmptyPayload)
+	if len(resp.Body) > 0 {
+		t.Error(errorOnNonEmptyBody)
 	}
 	if len(resp.Headers) > 0 {
-		t.Error(errorOnNonEmptyPayload)
+		t.Error(errorOnNonEmptyBody)
 	}
 }
 
@@ -44,16 +44,16 @@ func TestWithStatus(t *testing.T) {
 	}
 }
 
-func TestWithPayload(t *testing.T) {
+func TestWithBody(t *testing.T) {
 	html := "<html><body><p>>Hello World</p></body></html>"
-	resp := NewResponse(WithPayload([]byte(html)))
+	resp := NewResponse(WithBody([]byte(html)))
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
 		t.Errorf(errorOnStatusCode, w.statusCode)
 	}
 	if string(w.data) != html {
-		t.Errorf(errorOnPayload, w.data)
+		t.Errorf(errorOnBody, w.data)
 	}
 }
 
@@ -82,12 +82,12 @@ func TestWithContentTypeJson(t *testing.T) {
 	}
 }
 
-func TestWithJsonPayload(t *testing.T) {
+func TestWithJsonBody(t *testing.T) {
 	type message struct {
 		Data string `json:"data"`
 	}
 	mesg := message{Data: "hello world"}
-	resp := NewResponse(WithJsonPayload(mesg))
+	resp := NewResponse(WithJsonBody(mesg))
 	w := newMockResponseWriter()
 	resp.Write(w)
 	if w.statusCode != http.StatusOK {
@@ -96,8 +96,8 @@ func TestWithJsonPayload(t *testing.T) {
 	if w.header.Get(HeaderContentType) != TypeApplicationJson {
 		t.Errorf(errorOnHeader, w.header.Get(HeaderContentType))
 	}
-	if string(w.data) != expectedJsonPayload {
-		t.Errorf(errorOnPayload, string(w.data))
+	if string(w.data) != expectedJsonBody {
+		t.Errorf(errorOnBody, string(w.data))
 	}
 }
 
