@@ -50,7 +50,7 @@ func (h HeaderOption) Apply(response *Response) {
 	response.Headers[h.name] = h.value
 }
 
-// WithPayload sets the response's body.
+// WithBody sets the response's body.
 func WithBody(body []byte) Option {
 	return BodyOption{body: body}
 }
@@ -63,7 +63,7 @@ func (p BodyOption) Apply(response *Response) {
 	response.Body = p.body
 }
 
-// WithJsonPayload takes an object meant to be translated to JSON inside the response's body and sets the content-type to "application/json"
+// WithJsonBody takes an object meant to be translated to JSON inside the response's body and sets the content-type to "application/json"
 func WithJsonBody(v any) Option {
 	return JsonBodyOption{
 		data:   v,
