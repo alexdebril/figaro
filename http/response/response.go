@@ -28,10 +28,12 @@ func (s StatusOption) Apply(response *Response) {
 	response.Status = s.code
 }
 
+// WithContentTypeJson tells the Response its content-Type will be "application/json"
 func WithContentTypeJson() Option {
 	return WithHeader(HeaderContentType, TypeApplicationJson)
 }
 
+// WithHeader adds a header to the Response. Invoke WithHeader as many times as you have headers to set.
 func WithHeader(name, value string) Option {
 	return HeaderOption{
 		name:  name,
@@ -48,6 +50,7 @@ func (h HeaderOption) Apply(response *Response) {
 	response.Headers[h.name] = h.value
 }
 
+// WithPayload sets the response's body.
 func WithBody(body []byte) Option {
 	return BodyOption{body: body}
 }
@@ -60,6 +63,7 @@ func (p BodyOption) Apply(response *Response) {
 	response.Body = p.body
 }
 
+// WithJsonPayload takes an object meant to be translated to JSON inside the response's body and sets the content-type to "application/json"
 func WithJsonBody(v any) Option {
 	return JsonBodyOption{
 		data:   v,
@@ -89,6 +93,10 @@ func (jp JsonBodyOption) Apply(response *Response) {
 	response.Body = j
 }
 
+// NewResponse creates a Response with default attributes:
+// Status=200
+// Body=empty byte slice
+// Headers=empty hashmap
 func NewResponse(opts ...Option) *Response {
 	response := &Response{
 		Status:  DefaultHttpStatus,
@@ -101,6 +109,7 @@ func NewResponse(opts ...Option) *Response {
 	return response
 }
 
+// Write sends the Response's content to the http.ResponseWriter.
 func (r *Response) Write(w http.ResponseWriter) {
 	for name, value := range r.Headers {
 		w.Header().Set(name, value)
