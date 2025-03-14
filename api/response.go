@@ -1,4 +1,4 @@
-package response
+package api
 
 import (
 	"encoding/json"
@@ -12,11 +12,11 @@ const (
 	DefaultHttpStatus   = http.StatusOK
 )
 
-type Option interface {
+type ResponseOption interface {
 	Apply(response *Response)
 }
 
-func WithStatus(code int) Option {
+func WithStatus(code int) ResponseOption {
 	return StatusOption{code: code}
 }
 
@@ -29,12 +29,12 @@ func (s StatusOption) Apply(response *Response) {
 }
 
 // WithContentTypeJson tells the Response its content-Type will be "application/json"
-func WithContentTypeJson() Option {
+func WithContentTypeJson() ResponseOption {
 	return WithHeader(HeaderContentType, TypeApplicationJson)
 }
 
 // WithHeader adds a header to the Response. Invoke WithHeader as many times as you have headers to set.
-func WithHeader(name, value string) Option {
+func WithHeader(name, value string) ResponseOption {
 	return HeaderOption{
 		name:  name,
 		value: value,
@@ -51,7 +51,7 @@ func (h HeaderOption) Apply(response *Response) {
 }
 
 // WithBody sets the response's body.
-func WithBody(body []byte) Option {
+func WithBody(body []byte) ResponseOption {
 	return BodyOption{body: body}
 }
 
@@ -64,16 +64,16 @@ func (p BodyOption) Apply(response *Response) {
 }
 
 // WithJsonBody takes an object meant to be translated to JSON inside the response's body and sets the content-type to "application/json"
-func WithJsonBody(v any) Option {
+func WithJsonBody(v any) ResponseOption {
 	return JsonBodyOption{
-		data:   v,
-		Option: WithContentTypeJson(),
+		data:           v,
+		ResponseOption: WithContentTypeJson(),
 	}
 }
 
 type JsonBodyOption struct {
 	data any
-	Option
+	ResponseOption
 }
 
 type Response struct {
@@ -83,7 +83,7 @@ type Response struct {
 }
 
 func (jp JsonBodyOption) Apply(response *Response) {
-	jp.Option.Apply(response)
+	jp.ResponseOption.Apply(response)
 	j, err := json.Marshal(jp.data)
 	if err != nil {
 		response.Status = http.StatusInternalServerError
@@ -97,7 +97,7 @@ func (jp JsonBodyOption) Apply(response *Response) {
 // Status=200
 // Body=empty byte slice
 // Headers=empty hashmap
-func NewResponse(opts ...Option) *Response {
+func NewResponse(opts ...ResponseOption) *Response {
 	response := &Response{
 		Status:  DefaultHttpStatus,
 		Body:    make([]byte, 0),
@@ -109,7 +109,7 @@ func NewResponse(opts ...Option) *Response {
 	return response
 }
 
-func NewJsonResponse(v any, opts ...Option) *Response {
+func NewJsonResponse(v any, opts ...ResponseOption) *Response {
 	return NewResponse(append(opts, WithJsonBody(v))...)
 }
 
