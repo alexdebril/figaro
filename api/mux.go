@@ -23,8 +23,9 @@ type MuxBuilder struct {
 
 func NewMuxBuilder(logger *slog.Logger, opts ...MuxOption) *MuxBuilder {
 	mux := &MuxBuilder{
-		logger:      logger,
-		allowOrigin: AllowOriginValue,
+		logger:       logger,
+		allowOrigin:  AllowOriginValue,
+		allowHeaders: DefaultAllowHeader,
 	}
 	for _, opt := range opts {
 		opt(mux)
