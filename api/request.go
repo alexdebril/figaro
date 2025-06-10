@@ -7,16 +7,15 @@ import (
 )
 
 func ParseJsonRequest[T any](r *http.Request) (*T, error) {
-	body, err := r.GetBody()
-	if err != nil {
-		return nil, err
+	if r.Body == nil {
+		return nil, http.ErrBodyReadAfterClose
 	}
-	b, err := io.ReadAll(body)
+	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
 	}
 	var obj *T
-	err = json.Unmarshal(b, obj)
+	err = json.Unmarshal(b, &obj)
 	if err != nil {
 		return nil, err
 	}
@@ -24,10 +23,6 @@ func ParseJsonRequest[T any](r *http.Request) (*T, error) {
 }
 
 func BadRequest(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusBadRequest)
-	resp := NewJsonResponse(&Response{
-		Status: http.StatusBadRequest,
-		Body:   []byte(`{"error": "` + err.Error() + `"}`),
-	})
+	resp := NewJsonResponse(NewErrorResponse(err), WithStatus(http.StatusBadRequest))
 	resp.Write(w)
 }

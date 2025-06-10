@@ -121,3 +121,13 @@ func (r *Response) Write(w http.ResponseWriter) {
 	w.WriteHeader(r.Status)
 	_, _ = w.Write(r.Body)
 }
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+func NewErrorResponse(err error) *ErrorResponse {
+	return &ErrorResponse{
+		Error: err.Error(),
+	}
+}
