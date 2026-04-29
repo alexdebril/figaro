@@ -43,4 +43,26 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-See ? it's easy.
+### Telemetry
+
+Figaro provides the `otel` package to help in writing telemetry. 
+
+#### Testing telemetry
+
+It's easy to test if metrics and traces are being sent to the right place.
+
+```shell
+docker run -d --name jaeger \
+  -e COLLECTOR_OTLP_ENABLED=true \
+  -p 16686:16686 \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  jaegertracing/all-in-one:latest
+```
+Run your app, and then go to http://localhost:16686 to see the traces.
+
+#### Env variables
+
+```shell
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+```
