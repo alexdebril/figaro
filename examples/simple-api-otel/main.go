@@ -22,10 +22,14 @@ func main() {
 	l.Info("starting application")
 	l.Debug("startup params", slog.Any("flags", f), slog.String("address", f.address))
 
+	// build a context with custom attributes to define the resource's name and version
 	ctx := newContext()
+	// build the API's Mux in a factory function ...
 	mux := newAPIMux(ctx, l)
+	// wrap it with OTEL's tracing Mux ...
 	handler, shutdown := otel.NewHTTPHandler(ctx, l, mux, otel.WithTracing(), otel.WithMetrics())
 	defer shutdown(ctx)
+	// and finally run the server.
 	s := api.NewServer(l, handler, f.address)
 	if err := s.Listen(ctx); err != nil {
 		l.Error("server returned an error", slog.Any("err", err))
