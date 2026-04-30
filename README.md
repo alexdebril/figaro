@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alexdebril/figaro/http/response"
+	"github.com/alexdebril/figaro/api/response"
 )
 
 type JsonMessage struct {
@@ -47,6 +47,34 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 Figaro provides the `otel` package to help in writing telemetry. 
 
+It supports metrics and traces. Logs are excluded from the scope as it's not stable yet.
+
+#### HTTP Handler
+
+use the following code to wrap your HTTP handler:
+
+```go
+// build a context with custom attributes to define the resource's name and version
+ctx := newContext()
+// build the API's Mux in a factory function ...
+mux := newAPIMux(ctx, l)
+// wrap it with OTEL's tracing Mux ...
+handler, shutdown := otel.NewHTTPHandler(ctx, l, mux, otel.WithTracing(), otel.WithMetrics())
+defer shutdown(ctx)
+// and finally run the server.
+s := api.NewServer(l, handler, f.address)
+if err := s.Listen(ctx); err != nil {
+    l.Error("server returned an error", slog.Any("err", err))
+    os.Exit(1)
+}
+```
+
+See the [example](https://github.com/alexdebril/figaro/blob/main/examples/simple-api-otel/main.go) for more details.
+
+#### Instrumenting your code
+
+Everything's based on the [OpenTelemetry Go SDK](https://github.com/open-telemetry/opentelemetry-go). Visit the [Instrumentation](https://opentelemetry.io/docs/languages/go/instrumentation/) section to see how to instrument your code.
+
 #### Testing telemetry
 
 It's easy to test if metrics and traces are being sent to the right place.
@@ -61,7 +89,11 @@ docker run -d --name jaeger \
 ```
 Run your app, and then go to http://localhost:16686 to see the traces.
 
-#### Env variables
+#### Auto Exporters
+
+Figaro uses auto exporters to send metrics and traces to the right place. Its configuration is done by environment variables, as documented in the [OpenTelemetry Exporters Section](https://opentelemetry.io/docs/languages/go/exporters/#automatic-exporter-configuration-with-environment-variables)
+
+For instance:
 
 ```shell
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
